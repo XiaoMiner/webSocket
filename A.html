@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>xiaoA</title>
+</head>
+<style>
+    .talk-content-area {
+        width: 400px;
+        min-height: 400px;
+        background: gainsboro;
+    }
+</style>
+<script src="./jquery.js"></script>
+<body>
+<input type="text" id="info-input">
+<button class="send">发送</button>
+<div class="talk-content-area">
+
+</div>
+</body>
+<script>
+    let userInfo = {
+        name: '小A',
+        message: '',
+        firstLink: true
+    };
+    // 1.创建一个webSocket实例
+    let socket = new WebSocket('ws:localhost:7200');
+    // 2.连接webSocketService服务器的时候触发
+    socket.addEventListener('open', () => {
+        console.log('服务器连接成功');
+        $('#content-area').val('服务器连接成功');
+        // 告诉服务器连接的用户name
+        socket.send(JSON.stringify(userInfo));
+    });
+
+    // 3.主动向webSocketService服务器发送信息
+    $('.send').on('click', ()=>{
+        console.log('向服务器发送了一条数据');
+        userInfo.firstLink = false;
+        userInfo.message = $('#info-input').val();
+        socket.send(JSON.stringify(userInfo));
+        $('#info-input').val('');
+    })
+    // 4.接收到webSocketService服务器的返回信息时触发
+    socket.addEventListener('message', (e)=> {
+        console.log('接受到服务器返回的数据');
+        const div = document.createElement('div');
+        $(div).html(e.data);
+        $('.talk-content-area').append(div);
+    })
+
+    // 5.服务器断开连接
+    socket.addEventListener('close', ()=> {
+       console.log('断开连接')
+    })
+</script>
+</html>
